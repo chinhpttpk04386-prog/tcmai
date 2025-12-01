@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang cá nhân Phạm Tự Trung Chính - Lập trình AI</title>
+    <!-- Tải Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Cấu hình Font và Tailwind -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #f7f9fb; /* Nền nhẹ nhàng */
+        }
+        .slide-item {
+            display: none;
+            transition: opacity 1s ease-in-out;
+        }
+        .slide-item.active {
+            display: block;
+            opacity: 1;
+        }
+        /* Custom scrollbar for aesthetics (optional) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 4px;
+        }
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50%;
+            height: 4px;
+            background-color: #4f46e5; /* Màu tím chủ đạo */
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Khối Firebase/Auth (Bắt buộc cho môi trường Canvas) -->
+    <script type="module">
+        // Khởi tạo Firebase và Auth (bắt buộc trong môi trường Canvas, ngay cả khi không dùng Firestore)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Bắt buộc sử dụng các biến toàn cục này
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            setLogLevel('debug');
+
+            if (initialAuthToken) {
+                signInWithCustomToken(auth, initialAuthToken).catch(error => {
+                    console.error("Firebase Custom Auth failed:", error);
+                    signInAnonymously(auth).catch(err => console.error("Anonymous Auth failed:", err));
+                });
+            } else {
+                signInAnonymously(auth).catch(error => {
+                    console.error("Anonymous Auth failed:", error);
+                });
+            }
+        } else {
+            console.log("Firebase config not found. Running in standalone mode.");
+        }
+    </script>
+    <!-- Kết thúc khối Firebase/Auth -->
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4 md:justify-start md:space-x-10">
+                <!-- Logo/Tên -->
+                <div class="flex justify-start lg:w-0 lg:flex-1">
+                    <a href="#trang-chu" class="text-2xl font-extrabold text-indigo-600 hover:text-indigo-800 transition duration-300">
+                        P.T.T.Chính
+                    </a>
+                </div>
+                <!-- Menu Desktop -->
+                <nav class="hidden md:flex space-x-10">
+                    <a href="#trang-chu" class="text-base font-medium text-gray-500 hover:text-indigo-600 transition duration-300">Trang chủ</a>
+                    <a href="#gioi-thieu" class="text-base font-medium text-gray-500 hover:text-indigo-600 transition duration-300">Giới thiệu</a>
+                    <a href="#du-an" class="text-base font-medium text-gray-500 hover:text-indigo-600 transition duration-300">Dự án</a>
+                    <a href="#lien-he" class="text-base font-medium text-gray-500 hover:text-indigo-600 transition duration-300">Liên hệ</a>
+                </nav>
+                <!-- Menu Button Mobile -->
+                <div class="md:hidden">
+                    <button id="menu-toggle" type="button" class="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" aria-expanded="false">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Mobile (Ẩn/Hiện bằng JS) -->
+        <div id="mobile-menu" class="hidden md:hidden absolute w-full bg-white shadow-lg py-2 transition duration-300">
+            <a href="#trang-chu" class="block px-5 py-3 text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Trang chủ</a>
+            <a href="#gioi-thieu" class="block px-5 py-3 text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Giới thiệu</a>
+            <a href="#du-an" class="block px-5 py-3 text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Dự án</a>
+            <a href="#lien-he" class="block px-5 py-3 text-base font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" onclick="document.getElementById('mobile-menu').classList.add('hidden')">Liên hệ</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- 1. Slider (Trang chủ) -->
+        <section id="trang-chu" class="relative overflow-hidden w-full h-[60vh] sm:h-[80vh] bg-gray-900">
+            <div id="image-slider" class="relative w-full h-full">
+                <!-- Slide 1 -->
+                <div class="slide-item active absolute inset-0 bg-cover bg-center transition duration-1000" style="background-image: url('https://placehold.co/1920x1080/4f46e5/ffffff?text=AI+Dev+1');"></div>
+                <!-- Slide 2 -->
+                <div class="slide-item absolute inset-0 bg-cover bg-center transition duration-1000" style="background-image: url('https://placehold.co/1920x1080/4ade80/000000?text=Machine+Learning');"></div>
+                <!-- Slide 3 -->
+                <div class="slide-item absolute inset-0 bg-cover bg-center transition duration-1000" style="background-image: url('https://placehold.co/1920x1080/f97316/ffffff?text=Deep+Learning');"></div>
+                <!-- Slide 4 -->
+                <div class="slide-item absolute inset-0 bg-cover bg-center transition duration-1000" style="background-image: url('https://placehold.co/1920x1080/3b82f6/ffffff?text=Data+Science');"></div>
+                <!-- Slide 5 -->
+                <div class="slide-item absolute inset-0 bg-cover bg-center transition duration-1000" style="background-image: url('https://placehold.co/1920x1080/8b5cf6/ffffff?text=Programming');"></div>
+
+                <!-- Lớp phủ nội dung -->
+                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div class="text-center text-white">
+                        <h1 class="text-4xl sm:text-6xl font-extrabold mb-4 leading-tight">
+                            Chào mừng đến với trang cá nhân của tôi
+                        </h1>
+                        <p class="text-xl sm:text-2xl font-light">
+                            Phạm Tự Trung Chính - Chuyên ngành Lập trình phát triển ứng dụng AI
+                        </p>
+                        <a href="#gioi-thieu" class="mt-8 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 transform hover:scale-105">
+                            Khám phá thêm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Giới thiệu bản thân -->
+        <section id="gioi-thieu" class="py-16 sm:py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold section-title text-gray-800">Về tôi</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <!-- Cột Hình ảnh -->
+                    <div class="flex justify-center">
+                        <img src="https://placehold.co/400x400/1e293b/ffffff?text=Chinh's+Photo" 
+                             alt="Hình ảnh cá nhân Phạm Tự Trung Chính" 
+                             class="w-64 h-64 sm:w-80 sm:h-80 object-cover rounded-full shadow-2xl border-4 border-indigo-500 transition duration-500 transform hover:scale-105">
+                    </div>
+
+                    <!-- Cột Thông tin -->
+                    <div class="text-lg space-y-6">
+                        <h3 class="text-3xl font-semibold text-indigo-600">Phạm Tự Trung Chính</h3>
+                        
+                        <!-- Dòng thông tin cơ bản -->
+                        <div class="bg-indigo-50 p-4 rounded-xl shadow-inner">
+                            <p class="mb-2">
+                                <span class="font-medium text-gray-600">Họ và Tên:</span> 
+                                <span class="font-bold text-gray-800">Phạm Tự Trung Chính</span>
+                            </p>
+                            <p class="mb-2">
+                                <span class="font-medium text-gray-600">Mã Sinh Viên:</span> 
+                                <span class="font-bold text-gray-800">PK04386</span>
+                            </p>
+                            <p>
+                                <span class="font-medium text-gray-600">Chuyên ngành:</span> 
+                                <span class="font-bold text-gray-800">Lập trình phát triển ứng dụng AI</span>
+                            </p>
+                        </div>
+                        
+                        <p class="text-gray-700 leading-relaxed">
+                            Tôi là một sinh viên đam mê công nghệ và lập trình, đặc biệt tập trung vào lĩnh vực Trí tuệ Nhân tạo. Tôi tin rằng AI là tương lai của ngành công nghiệp phần mềm và đang không ngừng học hỏi để xây dựng các ứng dụng thông minh, giải quyết các vấn đề thực tế trong cuộc sống.
+                        </p>
+                        
+                        <p class="text-gray-700 leading-relaxed">
+                            Với kiến thức vững chắc về lập trình và mong muốn ứng dụng các thuật toán Machine Learning/Deep Learning, tôi luôn tìm kiếm những thử thách mới và cơ hội để phát triển các dự án sáng tạo.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Dự án -->
+        <section id="du-an" class="py-16 sm:py-24 bg-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold section-title text-gray-800">Các dự án tiêu biểu</h2>
+                    <p class="mt-4 text-xl text-gray-600">Nơi tôi ứng dụng kiến thức lập trình AI vào thực tế.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Dự án 1: Nhận diện hình ảnh -->
+                    <div class="bg-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 border-t-4 border-indigo-500">
+                        <svg class="w-10 h-10 text-indigo-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <h3 class="text-xl font-bold mb-3 text-gray-900">Hệ thống Nhận diện Hình ảnh</h3>
+                        <p class="text-gray-600">Xây dựng mô hình Deep Learning (CNN) để phân loại đối tượng, đạt độ chính xác cao trên tập dữ liệu lớn.</p>
+                        <span class="inline-block mt-4 text-sm font-medium text-indigo-600">#Python #TensorFlow #Keras</span>
+                    </div>
+
+                    <!-- Dự án 2: Chatbot hỗ trợ -->
+                    <div class="bg-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 border-t-4 border-indigo-500">
+                        <svg class="w-10 h-10 text-indigo-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                        <h3 class="text-xl font-bold mb-3 text-gray-900">Chatbot Dịch vụ Khách hàng</h3>
+                        <p class="text-gray-600">Phát triển chatbot sử dụng NLP và mô hình ngôn ngữ để trả lời tự động các câu hỏi thường gặp của người dùng.</p>
+                        <span class="inline-block mt-4 text-sm font-medium text-indigo-600">#NLP #Rasa #Python</span>
+                    </div>
+
+                    <!-- Dự án 3: Web App Phân tích Dữ liệu -->
+                    <div class="bg-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 border-t-4 border-indigo-500">
+                        <svg class="w-10 h-10 text-indigo-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                        <h3 class="text-xl font-bold mb-3 text-gray-900">Ứng dụng Dashboard Dữ liệu</h3>
+                        <p class="text-gray-600">Tạo ứng dụng web (HTML/JS) để trực quan hóa và phân tích dữ liệu lớn từ mô hình AI.</p>
+                        <span class="inline-block mt-4 text-sm font-medium text-indigo-600">#WebDev #DataViz #JavaScript</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Liên hệ -->
+        <section id="lien-he" class="py-16 sm:py-24 bg-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold section-title text-gray-800">Liên hệ với tôi</h2>
+                    <p class="mt-4 text-xl text-gray-600">Hãy cùng nhau thảo luận về các dự án AI tiềm năng!</p>
+                </div>
+                
+                <div class="bg-gray-50 p-8 rounded-xl shadow-2xl border-l-4 border-indigo-500">
+                    <form class="space-y-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Họ và Tên</label>
+                            <input type="text" id="name" name="name" placeholder="Ví dụ: Nguyễn Văn A" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="email" name="email" placeholder="Ví dụ: example@domain.com" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700">Nội dung</label>
+                            <textarea id="message" name="message" rows="4" placeholder="Tôi muốn trao đổi về dự án..." required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="w-full sm:w-auto inline-flex justify-center py-3 px-8 border border-transparent shadow-lg text-lg font-medium rounded-full text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 transform hover:scale-[1.02]">
+                                Gửi thông tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="md:flex md:justify-between md:items-center">
+                <!-- Thông tin Liên hệ -->
+                <div class="space-y-2 mb-6 md:mb-0">
+                    <p class="text-xl font-semibold text-indigo-400">Phạm Tự Trung Chính</p>
+                    <p class="text-sm">Chuyên ngành Lập trình phát triển ứng dụng AI</p>
+                    <div class="flex items-center space-x-3 mt-4">
+                        <!-- Điện thoại (Placeholder) -->
+                        <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.5l1.5 5 4-4 5 1.5V19a2 2 0 01-2 2H5a2 2 0 01-2-2v-2"></path></svg>
+                        <p>+84 123 456 789 (Số liên hệ)</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <!-- Email (Placeholder) -->
+                        <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-2 4v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7"></path></svg>
+                        <p>chinh.ai.dev@gmail.com</p>
+                    </div>
+                </div>
+
+                <!-- Điều hướng nhanh -->
+                <div class="flex space-x-6">
+                    <a href="#trang-chu" class="text-sm text-gray-400 hover:text-indigo-400 transition duration-300">Trang chủ</a>
+                    <a href="#gioi-thieu" class="text-sm text-gray-400 hover:text-indigo-400 transition duration-300">Giới thiệu</a>
+                    <a href="#du-an" class="text-sm text-gray-400 hover:text-indigo-400 transition duration-300">Dự án</a>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center">
+                <p class="text-sm text-gray-400">&copy; 2024 Phạm Tự Trung Chính. Thiết kế Landing Page cá nhân.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript cho Slider và Mobile Menu -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. Xử lý Mobile Menu ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Đóng menu khi click vào link trên mobile
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+
+            // --- 2. Xử lý Image Slider ---
+            const slides = document.querySelectorAll('.slide-item');
+            let currentSlide = 0;
+            const slideInterval = 5000; // 5 giây
+
+            function showSlide(index) {
+                // Ẩn tất cả các slide
+                slides.forEach(slide => {
+                    slide.classList.remove('active');
+                });
+
+                // Hiển thị slide hiện tại
+                slides[index].classList.add('active');
+            }
+
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % slides.length;
+                showSlide(currentSlide);
+            }
+
+            // Bắt đầu tự động chuyển slide
+            setInterval(nextSlide, slideInterval);
+
+            // Khởi tạo hiển thị slide đầu tiên
+            showSlide(currentSlide);
+        });
+    </script>
+
+</body>
+</html>
